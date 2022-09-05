@@ -26,7 +26,10 @@ while True:
     # Attach the test surface to the display surface
     # .blit() stands for block image transfer
     # .blit() takes two arguments, the surface and the position
-    screen.blit(test_surface, (0, 0))
+    #   I also want to note that the reason that the rectangle is not in the center is because position (0, 0)
+    #   starts at the top left corner of the window. So if we do (200, 100), it moves 200 pixels to the right
+    #   and 100 pixels from the top
+    screen.blit(test_surface, (200, 100))
 
     pygame.display.update()
 
