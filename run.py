@@ -7,13 +7,13 @@ from sys import exit # Secure way to end the program
 pygame.init()
 screen = pygame.display.set_mode((800, 400)) # Width of 800 pixels, height of 400 pixels
 pygame.display.set_caption("Run") # Sets the title of the window
+clock = pygame.time.Clock() # A Clock object is used to keep track of time and manage the framerate
+test_font = pygame.font.Font(None, 50) # Arguments: (font type, font size)
 
-# A Clock object is used to keep track of time and manage the framerate
-clock = pygame.time.Clock()
-
-# Making a pygame surface (the background)
+# Making the pygame surfaces
 sky_surface = pygame.image.load("graphics/sky.png")
 ground_surface = pygame.image.load("graphics/ground.png")
+text_surface = test_font.render("Score: ", True, "Black") # Arguments: (text, AA, color) - AA - anti-alias option
 
 while True:
     # We need to check for all the possible types of player input
@@ -25,12 +25,13 @@ while True:
 
     # Attach the test surface to the display surface
     # .blit() stands for block image transfer
-    # .blit() takes two arguments, the surface and the position
+    # .blit() takes two arguments, the surface and the position, and draws in the order of when you called the code
     #   I also want to note that the reason that the rectangle is not in the center is because position (0, 0)
     #   starts at the top left corner of the window. So if we do (200, 100), it moves 200 pixels to the right
     #   and 100 pixels from the top
-    screen.blit(ground_surface, (0, 300)) # 300 because that is when the sky_surface image ends
     screen.blit(sky_surface, (0, 0))
+    screen.blit(ground_surface, (0, 300)) # 300 because that is when the sky_surface image ends
+    screen.blit(text_surface, (320, 30))
 
     pygame.display.update()
 
