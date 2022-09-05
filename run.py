@@ -11,9 +11,9 @@ pygame.display.set_caption("Run") # Sets the title of the window
 # A Clock object is used to keep track of time and manage the framerate
 clock = pygame.time.Clock()
 
-# Making a pygame surface
-test_surface = pygame.Surface((100, 200))
-test_surface.fill("Red")
+# Making a pygame surface (the background)
+sky_surface = pygame.image.load("graphics/sky.png")
+ground_surface = pygame.image.load("graphics/ground.png")
 
 while True:
     # We need to check for all the possible types of player input
@@ -29,7 +29,8 @@ while True:
     #   I also want to note that the reason that the rectangle is not in the center is because position (0, 0)
     #   starts at the top left corner of the window. So if we do (200, 100), it moves 200 pixels to the right
     #   and 100 pixels from the top
-    screen.blit(test_surface, (200, 100))
+    screen.blit(ground_surface, (0, 300)) # 300 because that is when the sky_surface image ends
+    screen.blit(sky_surface, (0, 0))
 
     pygame.display.update()
 
