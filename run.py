@@ -11,6 +11,10 @@ pygame.display.set_caption("Run") # Sets the title of the window
 # A Clock object is used to keep track of time and manage the framerate
 clock = pygame.time.Clock()
 
+# Making a pygame surface
+test_surface = pygame.Surface((100, 200))
+test_surface.fill("Red")
+
 while True:
     # We need to check for all the possible types of player input
     for event in pygame.event.get():
@@ -18,6 +22,11 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+
+    # Attach the test surface to the display surface
+    # .blit() stands for block image transfer
+    # .blit() takes two arguments, the surface and the position
+    screen.blit(test_surface, (0, 0))
 
     pygame.display.update()
 
