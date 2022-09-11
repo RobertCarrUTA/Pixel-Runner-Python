@@ -10,7 +10,8 @@ def display_score():
     current_time_milliseconds = pygame.time.get_ticks() - start_time
     current_time = math.floor(current_time_milliseconds/1000)
     
-    score_surface = test_font.render("Score: " + str(current_time), True, "Black") # Arguments: (text, AA, color) - AA - anti-alias option
+    # f'{}' might be more secure and faster than str()?
+    score_surface = test_font.render(f'Score: {current_time}', True, "Black") # Arguments: (text, AA, color) - AA - anti-alias option
     score_rect = score_surface.get_rect(center = (400, 50))
     screen.blit(score_surface, score_rect)
 
