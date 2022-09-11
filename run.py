@@ -26,6 +26,11 @@ clock = pygame.time.Clock() # A Clock object is used to keep track of time and m
 smooth_font = pygame.font.Font(None, 50) # Arguments: (font type, font size)
 pixel_font = pygame.font.Font("fonts\Pixeltype.ttf", 50)
 
+# Background music
+background_music = pygame.mixer.Sound("audio/music.wav")
+background_music.set_volume(0.1)
+background_music.play(loops = -1) # loops = -1 means play loop it forever
+
 # Making the pygame surfaces
 # .convert() on .png images makes the image more friendly to work with for pygame
 # .convert_alpha() removes black and white background behind something like the snail
@@ -57,6 +62,9 @@ game_active = False
 start_time = 0 # Keep track of our time
 score = 0
 
+jump_sound = pygame.mixer.Sound("audio\jump.mp3")
+jump_sound.set_volume(0.1)
+
 while True:
     # We need to check for all the possible types of player input
     for event in pygame.event.get():
@@ -70,6 +78,7 @@ while True:
                 if event.key == pygame.K_SPACE:
                     # Only allow the player to jump if they are touching the ground
                     if player_rect.bottom == 300:
+                        jump_sound.play()
                         player_gravity = -20
         else:
             # Reset the game if the player presses space again
