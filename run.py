@@ -11,7 +11,7 @@ def display_score():
     current_time = math.floor(current_time_milliseconds/1000)
     
     # f'{}' might be more secure and faster than str()?
-    score_surface = test_font.render(f'Score: {current_time}', True, "Black") # Arguments: (text, AA, color) - AA - anti-alias option
+    score_surface = smooth_font.render(f'Score: {current_time}', True, "Black") # Arguments: (text, AA, color) - AA - anti-alias option
     score_rect = score_surface.get_rect(center = (400, 50))
     screen.blit(score_surface, score_rect)
 
@@ -21,7 +21,8 @@ pygame.init()
 screen = pygame.display.set_mode((800, 400)) # Width of 800 pixels, height of 400 pixels
 pygame.display.set_caption("Run") # Sets the title of the window
 clock = pygame.time.Clock() # A Clock object is used to keep track of time and manage the framerate
-test_font = pygame.font.Font(None, 50) # Arguments: (font type, font size)
+smooth_font = pygame.font.Font(None, 50) # Arguments: (font type, font size)
+pixel_font = pygame.font.Font("fonts\Pixeltype.ttf", 50)
 
 # Making the pygame surfaces
 # .convert() on .png images makes the image more friendly to work with for pygame
@@ -31,15 +32,24 @@ ground_surface = pygame.image.load("graphics/ground.png").convert()
 snail_surface = pygame.image.load("graphics\snail\snail1.png").convert_alpha()
 player_surface = pygame.image.load("graphics\player\player_walk_1.png").convert_alpha()
 
-end_surface = test_font.render("Press Space to play again", True, "Black") # Arguments: (text, AA, color) - AA - anti-alias option
-end_rect = end_surface.get_rect(center = (400, 200))
-
 # Creating a player rectangle to gain more control over positioning as opposed to a surface
 # .get_rect() gets the surface and draws a rectangle around it
 player_rect = player_surface.get_rect(midbottom = (80, 300))
 snail_rect = snail_surface.get_rect(midbottom = (600, 300))
 
 player_gravity = 0
+
+# Intro/Restart Screen
+player_stand = pygame.image.load("graphics\player\player_stand.png").convert_alpha()
+player_stand = pygame.transform.rotozoom(player_stand, 0, 2) # (surface, angel, scale)
+player_stand_rect = player_stand.get_rect(center = (400, 200))
+
+game_name = pixel_font.render("Pixel Runner", False, (111, 196, 169))
+game_name_rect = game_name.get_rect(center = (400, 80))
+
+# End message
+game_message = smooth_font.render("Press Space to play again", True, (111, 196, 169)) # Arguments: (text, AA, color) - AA - anti-alias option
+game_message_rect = game_message.get_rect(center = (400, 340))
 
 game_active = True
 start_time = 0 # Keep track of our time
@@ -101,7 +111,10 @@ while True:
             game_active = False
     # A menu for after the player dies
     else:
-        screen.blit(end_surface, end_rect)
+        screen.fill((94, 129, 162))
+        screen.blit(player_stand, player_stand_rect)
+        screen.blit(game_name, game_name_rect)
+        screen.blit(game_message, game_message_rect)
 
     pygame.display.update()
 
