@@ -21,12 +21,17 @@ player_surface = pygame.image.load("graphics\player\player_walk_1.png").convert_
 score_surface = test_font.render("Score: ", True, "Black") # Arguments: (text, AA, color) - AA - anti-alias option
 score_rect = score_surface.get_rect(center = (400, 50))
 
+end_surface = test_font.render("Press Space to play again", True, "Black") # Arguments: (text, AA, color) - AA - anti-alias option
+end_rect = end_surface.get_rect(center = (400, 200))
+
 # Creating a player rectangle to gain more control over positioning as opposed to a surface
 # .get_rect() gets the surface and draws a rectangle around it
 player_rect = player_surface.get_rect(midbottom = (80, 300))
 snail_rect = snail_surface.get_rect(midbottom = (600, 300))
 
 player_gravity = 0
+
+game_active = True
 
 while True:
     # We need to check for all the possible types of player input
@@ -35,39 +40,52 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        if event.type == pygame.KEYDOWN:
-            # When the player jumps using SPACE
-            if event.key == pygame.K_SPACE:
-                # Only allow the player to jump if they are touching the ground
-                if player_rect.bottom == 300:
-                    player_gravity = -20
+        if game_active:    
+            if event.type == pygame.KEYDOWN:
+                # When the player jumps using SPACE
+                if event.key == pygame.K_SPACE:
+                    # Only allow the player to jump if they are touching the ground
+                    if player_rect.bottom == 300:
+                        player_gravity = -20
+        else:
+            # Reset the game if the player presses space again
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                snail_rect.left = 800
+                game_active = True
 
-    # Attach the test surface to the display surface
-    # .blit() stands for block image transfer
-    # .blit() takes two arguments, the surface and the position, and draws in the order of when you called the code
-    #   I also want to note that the reason that the rectangle is not in the center is because position (0, 0)
-    #   starts at the top left corner of the window. So if we do (200, 100), it moves 200 pixels to the right
-    #   and 100 pixels from the top
-    screen.blit(sky_surface, (0, 0))
-    screen.blit(ground_surface, (0, 300)) # 300 because that is when the sky_surface image ends
-    screen.blit(score_surface, score_rect)
+    if game_active:
+        # Attach the test surface to the display surface
+        # .blit() stands for block image transfer
+        # .blit() takes two arguments, the surface and the position, and draws in the order of when you called the code
+        #   I also want to note that the reason that the rectangle is not in the center is because position (0, 0)
+        #   starts at the top left corner of the window. So if we do (200, 100), it moves 200 pixels to the right
+        #   and 100 pixels from the top
+        screen.blit(sky_surface, (0, 0))
+        screen.blit(ground_surface, (0, 300)) # 300 because that is when the sky_surface image ends
+        screen.blit(score_surface, score_rect)
 
-    # Snail
-    # snail_rect.x is updated in the loop to animate the snail moving towards the player
-    snail_rect.x -= 4
-    if snail_rect.right <= 0:
-        snail_rect.left = 800
-    screen.blit(snail_surface, snail_rect)
+        # Snail
+        # snail_rect.x is updated in the loop to animate the snail moving towards the player
+        snail_rect.x -= 6
+        if snail_rect.right <= 0:
+            snail_rect.left = 800
+        screen.blit(snail_surface, snail_rect)
 
-    # Player
-    # I would like to note that you can print the value of a rectangle. Example:
-    # print(player_rect.left)
-    player_gravity += 1
-    player_rect.y += player_gravity
-    if player_rect.bottom >= 300:
-        player_rect.bottom = 300
-    screen.blit(player_surface, player_rect)
-    
+        # Player
+        # I would like to note that you can print the value of a rectangle. Example:
+        # print(player_rect.left)
+        player_gravity += 1
+        player_rect.y += player_gravity
+        if player_rect.bottom >= 300:
+            player_rect.bottom = 300
+        screen.blit(player_surface, player_rect)
+
+        # Collisions
+        if snail_rect.colliderect(player_rect):
+            game_active = False
+    # A menu for after the player dies
+    else:
+        screen.blit(end_surface, end_rect)
 
     pygame.display.update()
 
