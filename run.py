@@ -16,10 +16,13 @@ test_font = pygame.font.Font(None, 50) # Arguments: (font type, font size)
 sky_surface = pygame.image.load("graphics/sky.png").convert()
 ground_surface = pygame.image.load("graphics/ground.png").convert()
 snail_surface = pygame.image.load("graphics\snail\snail1.png").convert_alpha()
+player_surface = pygame.image.load("graphics\player\player_walk_1.png").convert_alpha()
 text_surface = test_font.render("Score: ", True, "Black") # Arguments: (text, AA, color) - AA - anti-alias option
 
-# snail_x_position is updated in the loop to animate the snail moving towards the player
-snail_x_position = 600
+# Creating a player rectangle to gain more control over positioning as opposed to a surface
+# .get_rect() gets the surface and draws a rectangle around it
+player_rect = player_surface.get_rect(midbottom = (80, 300))
+snail_rect = snail_surface.get_rect(midbottom = (600, 300))
 
 while True:
     # We need to check for all the possible types of player input
@@ -38,12 +41,16 @@ while True:
     screen.blit(sky_surface, (0, 0))
     screen.blit(ground_surface, (0, 300)) # 300 because that is when the sky_surface image ends
     screen.blit(text_surface, (320, 30))
-    snail_x_position -= 4 # Make the snail move left every frame
+    screen.blit(snail_surface, snail_rect)
+
+    # snail_rect.x is updated in the loop to animate the snail moving towards the player
+    snail_rect.x -= 4
+    if snail_rect.right <= 0:
+        snail_rect.left = 800
     
-    # If the snail goes off the screen, reset it to come back to the player
-    if snail_x_position < -80:
-        snail_x_position = 800
-    screen.blit(snail_surface, (snail_x_position, 250))
+    # I would like to note that you can print the value of a rectangle. Example:
+    # print(player_rect.left)
+    screen.blit(player_surface, player_rect)
 
     pygame.display.update()
 
