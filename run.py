@@ -11,9 +11,15 @@ clock = pygame.time.Clock() # A Clock object is used to keep track of time and m
 test_font = pygame.font.Font(None, 50) # Arguments: (font type, font size)
 
 # Making the pygame surfaces
-sky_surface = pygame.image.load("graphics/sky.png")
-ground_surface = pygame.image.load("graphics/ground.png")
+# .convert() on .png images makes the image more friendly to work with for pygame
+# .convert_alpha() removes black and white background behind something like the snail
+sky_surface = pygame.image.load("graphics/sky.png").convert()
+ground_surface = pygame.image.load("graphics/ground.png").convert()
+snail_surface = pygame.image.load("graphics\snail\snail1.png").convert_alpha()
 text_surface = test_font.render("Score: ", True, "Black") # Arguments: (text, AA, color) - AA - anti-alias option
+
+# snail_x_position is updated in the loop to animate the snail moving towards the player
+snail_x_position = 600
 
 while True:
     # We need to check for all the possible types of player input
@@ -32,6 +38,12 @@ while True:
     screen.blit(sky_surface, (0, 0))
     screen.blit(ground_surface, (0, 300)) # 300 because that is when the sky_surface image ends
     screen.blit(text_surface, (320, 30))
+    snail_x_position -= 4 # Make the snail move left every frame
+    
+    # If the snail goes off the screen, reset it to come back to the player
+    if snail_x_position < -80:
+        snail_x_position = 800
+    screen.blit(snail_surface, (snail_x_position, 250))
 
     pygame.display.update()
 
