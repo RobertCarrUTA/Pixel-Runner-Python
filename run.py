@@ -1,8 +1,9 @@
 # This code could be heavily commented because it is for me to learn, so I will take notes
 
 import pygame
-from sys import exit    # Secure way to end the program
-import math             # For rounding seconds
+from sys import exit        # Secure way to end the program
+import math                 # For rounding seconds
+from random import randint  # For generating random numbers
 
 def display_score():
     # pygame.time.get_ticks() will give us a time in milliseconds since we called pygame.init
@@ -16,6 +17,23 @@ def display_score():
     screen.blit(score_surface, score_rect)
     
     return current_time
+
+def obstacle_movement(enemy_list):
+    if enemy_list:
+        for enemy_rect in enemy_list:
+            enemy_rect.x -= 5
+            screen.blit(snail_surface, enemy_rect)
+
+        # List comprehension to check if enemies need to be removed (they have gone off screen)
+        # This copies every item in the list if the enemy has not gone off the left side border of the window
+        enemy_list = [enemy for enemy in enemy_list if enemy.x > -100]
+
+        return enemy_list
+    else:
+        # If the list is empty, which it will be when we start, we need to return an empty list
+        # If we do not return an empty list, this function will return NoneType, which cannot use append. See error:
+        # AttributeError: 'NoneType' object has no attribute 'append'
+        return []
 
 
 # pygame.init() - starts pygame and initiates all the sub parts of pygame
@@ -36,15 +54,21 @@ background_music.play(loops = -1) # loops = -1 means play loop it forever
 # .convert_alpha() removes black and white background behind something like the snail
 sky_surface = pygame.image.load("graphics/sky.png").convert()
 ground_surface = pygame.image.load("graphics/ground.png").convert()
-snail_surface = pygame.image.load("graphics\snail\snail1.png").convert_alpha()
-player_surface = pygame.image.load("graphics\player\player_walk_1.png").convert_alpha()
 
+# Player
 # Creating a player rectangle to gain more control over positioning as opposed to a surface
 # .get_rect() gets the surface and draws a rectangle around it
+player_surface = pygame.image.load("graphics\player\player_walk_1.png").convert_alpha()
 player_rect = player_surface.get_rect(midbottom = (80, 300))
+player_gravity = 0
+
+# Enemies
+# Snail
+snail_surface = pygame.image.load("graphics\snail\snail1.png").convert_alpha()
 snail_rect = snail_surface.get_rect(midbottom = (600, 300))
 
-player_gravity = 0
+# A list of all the current enemies
+enemy_rect_list = []
 
 # Intro/Restart Screen
 player_stand = pygame.image.load("graphics\player\player_stand.png").convert_alpha()
@@ -65,6 +89,13 @@ score = 0
 jump_sound = pygame.mixer.Sound("audio\jump.mp3")
 jump_sound.set_volume(0.1)
 
+# Enemy timers
+# Create a custom user event: We need to + 1 to avoid any conflicts with other events
+obstacle_timer = pygame.USEREVENT + 1
+pygame.time.set_timer(obstacle_timer, 1500) # (event we want to trigger, how ofter we want to trigger it in milliseconds)
+
+
+
 while True:
     # We need to check for all the possible types of player input
     for event in pygame.event.get():
@@ -72,7 +103,11 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        if game_active:    
+
+        if game_active:
+            if event.type == obstacle_timer:
+                enemy_rect_list.append(snail_surface.get_rect(midbottom = (randint(900, 1100), 300)))
+
             if event.type == pygame.KEYDOWN:
                 # When the player jumps using SPACE
                 if event.key == pygame.K_SPACE:
@@ -89,7 +124,9 @@ while True:
                 # Lets us restart our time every time we restart
                 start_time = pygame.time.get_ticks()
 
+    # While the game is active
     if game_active:
+
         # Attach the test surface to the display surface
         # .blit() stands for block image transfer
         # .blit() takes two arguments, the surface and the position, and draws in the order of when you called the code
@@ -100,13 +137,6 @@ while True:
         screen.blit(ground_surface, (0, 300)) # 300 because that is when the sky_surface image ends
         score = display_score()
 
-        # Snail
-        # snail_rect.x is updated in the loop to animate the snail moving towards the player
-        snail_rect.x -= 6
-        if snail_rect.right <= 0:
-            snail_rect.left = 800
-        screen.blit(snail_surface, snail_rect)
-
         # Player
         # I would like to note that you can print the value of a rectangle. Example:
         # print(player_rect.left)
@@ -115,6 +145,9 @@ while True:
         if player_rect.bottom >= 300:
             player_rect.bottom = 300
         screen.blit(player_surface, player_rect)
+
+        # Enemy movement
+        enemy_rect_list = obstacle_movement(enemy_rect_list)
 
         # Collisions
         if snail_rect.colliderect(player_rect):
