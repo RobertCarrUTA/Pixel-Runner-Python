@@ -22,7 +22,12 @@ def obstacle_movement(enemy_list):
     if enemy_list:
         for enemy_rect in enemy_list:
             enemy_rect.x -= 5
-            screen.blit(snail_surface, enemy_rect)
+
+            # Differentiate between snail and fly rectangles
+            if enemy_rect.bottom == 300:
+                screen.blit(snail_surface, enemy_rect)
+            else:
+                screen.blit(fly_surface, enemy_rect)
 
         # List comprehension to check if enemies need to be removed (they have gone off screen)
         # This copies every item in the list if the enemy has not gone off the left side border of the window
@@ -63,9 +68,9 @@ player_rect = player_surface.get_rect(midbottom = (80, 300))
 player_gravity = 0
 
 # Enemies
-# Snail
-snail_surface = pygame.image.load("graphics\snail\snail1.png").convert_alpha()
-snail_rect = snail_surface.get_rect(midbottom = (600, 300))
+# Use r"Path" to avoid errors caused by \ in the string
+snail_surface = pygame.image.load(r"graphics\snail\snail1.png").convert_alpha()
+fly_surface = pygame.image.load(r"graphics\bug\bug1.png").convert_alpha()
 
 # A list of all the current enemies
 enemy_rect_list = []
@@ -106,8 +111,12 @@ while True:
 
         if game_active:
             if event.type == obstacle_timer:
-                enemy_rect_list.append(snail_surface.get_rect(midbottom = (randint(900, 1100), 300)))
+                if randint(0, 2):
+                    enemy_rect_list.append(snail_surface.get_rect(midbottom = (randint(900, 1100), 300)))
+                else:
+                    enemy_rect_list.append(fly_surface.get_rect(midbottom = (randint(900, 1100), 210)))
 
+                
             if event.type == pygame.KEYDOWN:
                 # When the player jumps using SPACE
                 if event.key == pygame.K_SPACE:
@@ -118,7 +127,6 @@ while True:
         else:
             # Reset the game if the player presses space again
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                snail_rect.left = 800
                 game_active = True
 
                 # Lets us restart our time every time we restart
@@ -149,9 +157,6 @@ while True:
         # Enemy movement
         enemy_rect_list = obstacle_movement(enemy_rect_list)
 
-        # Collisions
-        if snail_rect.colliderect(player_rect):
-            game_active = False
     # A menu for after the player dies
     else:
         screen.fill((94, 129, 162))
