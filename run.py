@@ -14,6 +14,8 @@ def display_score():
     score_surface = smooth_font.render(f'Score: {current_time}', True, "Black") # Arguments: (text, AA, color) - AA - anti-alias option
     score_rect = score_surface.get_rect(center = (400, 50))
     screen.blit(score_surface, score_rect)
+    
+    return current_time
 
 
 # pygame.init() - starts pygame and initiates all the sub parts of pygame
@@ -48,11 +50,12 @@ game_name = pixel_font.render("Pixel Runner", False, (111, 196, 169))
 game_name_rect = game_name.get_rect(center = (400, 80))
 
 # End message
-game_message = smooth_font.render("Press Space to play again", True, (111, 196, 169)) # Arguments: (text, AA, color) - AA - anti-alias option
+game_message = smooth_font.render("Press Space to play", True, (111, 196, 169)) # Arguments: (text, AA, color) - AA - anti-alias option
 game_message_rect = game_message.get_rect(center = (400, 340))
 
-game_active = True
+game_active = False
 start_time = 0 # Keep track of our time
+score = 0
 
 while True:
     # We need to check for all the possible types of player input
@@ -86,9 +89,7 @@ while True:
         #   and 100 pixels from the top
         screen.blit(sky_surface, (0, 0))
         screen.blit(ground_surface, (0, 300)) # 300 because that is when the sky_surface image ends
-        
-        #screen.blit(score_surface, score_rect)
-        display_score()
+        score = display_score()
 
         # Snail
         # snail_rect.x is updated in the loop to animate the snail moving towards the player
@@ -114,7 +115,14 @@ while True:
         screen.fill((94, 129, 162))
         screen.blit(player_stand, player_stand_rect)
         screen.blit(game_name, game_name_rect)
-        screen.blit(game_message, game_message_rect)
+
+        score_message = smooth_font.render(f'Your score: {score}', True, (111, 196, 169))
+        score_message_rect = score_message.get_rect(center = (400, 330))
+
+        if score == 0:
+            screen.blit(game_message, game_message_rect)
+        else:
+            screen.blit(score_message, score_message_rect)
 
     pygame.display.update()
 
