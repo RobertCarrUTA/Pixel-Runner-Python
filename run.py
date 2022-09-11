@@ -119,6 +119,7 @@ while True:
         score_message = smooth_font.render(f'Your score: {score}', True, (111, 196, 169))
         score_message_rect = score_message.get_rect(center = (400, 330))
 
+        # If the score is 0, the player just started the game. They are not coming from a death
         if score == 0:
             screen.blit(game_message, game_message_rect)
         else:
