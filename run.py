@@ -1,8 +1,9 @@
 # This code could be heavily commented because it is for me to learn, so I will take notes
 
 import pygame
-from sys import exit    # Secure way to end the program
-import math             # For rounding seconds
+from sys import exit        # Secure way to end the program
+import math                 # For rounding seconds
+from random import randint  # For generating random numbers
 
 def display_score():
     # pygame.time.get_ticks() will give us a time in milliseconds since we called pygame.init
@@ -17,13 +18,44 @@ def display_score():
     
     return current_time
 
+def obstacle_movement(enemy_list):
+    if enemy_list:
+        for enemy_rect in enemy_list:
+            enemy_rect.x -= 5
+
+            # Differentiate between snail and fly rectangles
+            if enemy_rect.bottom == 300:
+                screen.blit(snail_surface, enemy_rect)
+            else:
+                screen.blit(fly_surface, enemy_rect)
+
+        # List comprehension to check if enemies need to be removed (they have gone off screen)
+        # This copies every item in the list if the enemy has not gone off the left side border of the window
+        enemy_list = [enemy for enemy in enemy_list if enemy.x > -100]
+
+        return enemy_list
+    else:
+        # If the list is empty, which it will be when we start, we need to return an empty list
+        # If we do not return an empty list, this function will return NoneType, which cannot use append. See error:
+        # AttributeError: 'NoneType' object has no attribute 'append'
+        return []
+
+def collisions(player, enemies):
+    if enemies:
+        for enemies_rect in enemies:
+            if player.colliderect(enemies_rect):
+                # When we hit an enemy, set game_active = False
+                return False
+    # When we don't hit an enemy, set game_active = True
+    return True
+
 
 # pygame.init() - starts pygame and initiates all the sub parts of pygame
 pygame.init()
-screen = pygame.display.set_mode((800, 400)) # Width of 800 pixels, height of 400 pixels
-pygame.display.set_caption("Run") # Sets the title of the window
-clock = pygame.time.Clock() # A Clock object is used to keep track of time and manage the framerate
-smooth_font = pygame.font.Font(None, 50) # Arguments: (font type, font size)
+screen = pygame.display.set_mode((800, 400))    # Width of 800 pixels, height of 400 pixels
+pygame.display.set_caption("Run")               # Sets the title of the window
+clock = pygame.time.Clock()                     # A Clock object is used to keep track of time and manage the framerate
+smooth_font = pygame.font.Font(None, 50)        # Arguments: (font type, font size)
 pixel_font = pygame.font.Font("fonts\Pixeltype.ttf", 50)
 
 # Background music
@@ -36,15 +68,21 @@ background_music.play(loops = -1) # loops = -1 means play loop it forever
 # .convert_alpha() removes black and white background behind something like the snail
 sky_surface = pygame.image.load("graphics/sky.png").convert()
 ground_surface = pygame.image.load("graphics/ground.png").convert()
-snail_surface = pygame.image.load("graphics\snail\snail1.png").convert_alpha()
-player_surface = pygame.image.load("graphics\player\player_walk_1.png").convert_alpha()
 
+# Player
 # Creating a player rectangle to gain more control over positioning as opposed to a surface
 # .get_rect() gets the surface and draws a rectangle around it
+player_surface = pygame.image.load("graphics\player\player_walk_1.png").convert_alpha()
 player_rect = player_surface.get_rect(midbottom = (80, 300))
-snail_rect = snail_surface.get_rect(midbottom = (600, 300))
-
 player_gravity = 0
+
+# Enemies
+# Use r"Path" to avoid errors caused by \ in the string
+snail_surface = pygame.image.load(r"graphics\snail\snail1.png").convert_alpha()
+fly_surface = pygame.image.load(r"graphics\bug\bug1.png").convert_alpha()
+
+# A list of all the current enemies
+enemy_rect_list = []
 
 # Intro/Restart Screen
 player_stand = pygame.image.load("graphics\player\player_stand.png").convert_alpha()
@@ -65,6 +103,13 @@ score = 0
 jump_sound = pygame.mixer.Sound("audio\jump.mp3")
 jump_sound.set_volume(0.1)
 
+# Enemy timers
+# Create a custom user event: We need to + 1 to avoid any conflicts with other events
+obstacle_timer = pygame.USEREVENT + 1
+pygame.time.set_timer(obstacle_timer, 1500) # (event we want to trigger, how ofter we want to trigger it in milliseconds)
+
+
+
 while True:
     # We need to check for all the possible types of player input
     for event in pygame.event.get():
@@ -72,7 +117,15 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        if game_active:    
+
+        if game_active:
+            if event.type == obstacle_timer:
+                if randint(0, 2):
+                    enemy_rect_list.append(snail_surface.get_rect(midbottom = (randint(900, 1100), 300)))
+                else:
+                    enemy_rect_list.append(fly_surface.get_rect(midbottom = (randint(900, 1100), 210)))
+
+                
             if event.type == pygame.KEYDOWN:
                 # When the player jumps using SPACE
                 if event.key == pygame.K_SPACE:
@@ -83,13 +136,14 @@ while True:
         else:
             # Reset the game if the player presses space again
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                snail_rect.left = 800
                 game_active = True
 
                 # Lets us restart our time every time we restart
                 start_time = pygame.time.get_ticks()
 
+    # While the game is active
     if game_active:
+
         # Attach the test surface to the display surface
         # .blit() stands for block image transfer
         # .blit() takes two arguments, the surface and the position, and draws in the order of when you called the code
@@ -98,14 +152,8 @@ while True:
         #   and 100 pixels from the top
         screen.blit(sky_surface, (0, 0))
         screen.blit(ground_surface, (0, 300)) # 300 because that is when the sky_surface image ends
+        
         score = display_score()
-
-        # Snail
-        # snail_rect.x is updated in the loop to animate the snail moving towards the player
-        snail_rect.x -= 6
-        if snail_rect.right <= 0:
-            snail_rect.left = 800
-        screen.blit(snail_surface, snail_rect)
 
         # Player
         # I would like to note that you can print the value of a rectangle. Example:
@@ -116,14 +164,22 @@ while True:
             player_rect.bottom = 300
         screen.blit(player_surface, player_rect)
 
+        # Enemy movement
+        enemy_rect_list = obstacle_movement(enemy_rect_list)
+
         # Collisions
-        if snail_rect.colliderect(player_rect):
-            game_active = False
+        game_active = collisions(player_rect, enemy_rect_list)
+
     # A menu for after the player dies
     else:
         screen.fill((94, 129, 162))
         screen.blit(player_stand, player_stand_rect)
         screen.blit(game_name, game_name_rect)
+
+        # Clear the enemy list so when the game restarts we are not colliding with an enemy
+        enemy_rect_list.clear()
+        player_rect.midbottom = (80, 300)
+        player_gravity = 0
 
         score_message = smooth_font.render(f'Your score: {score}', True, (111, 196, 169))
         score_message_rect = score_message.get_rect(center = (400, 330))
