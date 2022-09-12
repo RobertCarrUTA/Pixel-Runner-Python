@@ -49,6 +49,18 @@ def collisions(player, enemies):
     # When we don't hit an enemy, set game_active = True
     return True
 
+def player_animation():
+    global player_surface, player_index
+
+    # Display the jumping animation when the player is not on the floor
+    if player_rect.bottom < 300:
+        player_surface = player_jump
+    # Play walking animation if the player is on the floor
+    else:
+        player_index += 0.1 # This allows us to slowly move to the next animation (relative to instant moving back and forth between frames)
+        if player_index >= len(player_walk):
+            player_index = 0
+        player_surface = player_walk[int(player_index)]
 
 # pygame.init() - starts pygame and initiates all the sub parts of pygame
 pygame.init()
@@ -72,7 +84,12 @@ ground_surface = pygame.image.load("graphics/ground.png").convert()
 # Player
 # Creating a player rectangle to gain more control over positioning as opposed to a surface
 # .get_rect() gets the surface and draws a rectangle around it
-player_surface = pygame.image.load("graphics\player\player_walk_1.png").convert_alpha()
+player_walk_1 = pygame.image.load("graphics\player\player_walk_1.png").convert_alpha()
+player_walk_2 = pygame.image.load("graphics\player\player_walk_2.png").convert_alpha()
+player_walk = [player_walk_1, player_walk_2]
+player_index = 0 # Used to pick the walking animation of the player
+player_jump = pygame.image.load("graphics\player\jump.png").convert_alpha()
+player_surface = player_walk[player_index]
 player_rect = player_surface.get_rect(midbottom = (80, 300))
 player_gravity = 0
 
@@ -162,6 +179,7 @@ while True:
         player_rect.y += player_gravity
         if player_rect.bottom >= 300:
             player_rect.bottom = 300
+        player_animation()
         screen.blit(player_surface, player_rect)
 
         # Enemy movement
