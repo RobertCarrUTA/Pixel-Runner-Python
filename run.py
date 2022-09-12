@@ -94,9 +94,21 @@ player_rect = player_surface.get_rect(midbottom = (80, 300))
 player_gravity = 0
 
 # Enemies
+
+# Snail
 # Use r"Path" to avoid errors caused by \ in the string
-snail_surface = pygame.image.load(r"graphics\snail\snail1.png").convert_alpha()
-fly_surface = pygame.image.load(r"graphics\bug\bug1.png").convert_alpha()
+snail_frame_1 = pygame.image.load(r"graphics\snail\snail1.png").convert_alpha()
+snail_frame_2 = pygame.image.load(r"graphics\snail\snail2.png").convert_alpha()
+snail_frames = [snail_frame_1, snail_frame_2]
+snail_frame_index = 0
+snail_surface = snail_frames[snail_frame_index]
+
+# Fly
+fly_frame_1 = pygame.image.load(r"graphics\bug\bug1.png").convert_alpha()
+fly_frame_2 = pygame.image.load(r"graphics\bug\bug2.png").convert_alpha()
+fly_frames = [fly_frame_1, fly_frame_2]
+fly_frame_index = 0
+fly_surface = fly_frames[fly_frame_index]
 
 # A list of all the current enemies
 enemy_rect_list = []
@@ -125,6 +137,11 @@ jump_sound.set_volume(0.1)
 obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer, 1500) # (event we want to trigger, how ofter we want to trigger it in milliseconds)
 
+snail_animation_timer = pygame.USEREVENT + 2
+pygame.time.set_timer(snail_animation_timer, 500)
+
+fly_animation_timer = pygame.USEREVENT + 3
+pygame.time.set_timer(fly_animation_timer, 200)
 
 
 while True:
@@ -142,7 +159,22 @@ while True:
                 else:
                     enemy_rect_list.append(fly_surface.get_rect(midbottom = (randint(900, 1100), 210)))
 
+            # Animating the snail
+            if event.type == snail_animation_timer:
+                if snail_frame_index == 0:
+                    snail_frame_index = 1
+                else:
+                    snail_frame_index = 0
+                snail_surface = snail_frames[snail_frame_index]
                 
+            # Animating the fly
+            if event.type == fly_animation_timer:
+                if fly_frame_index == 0:
+                    fly_frame_index = 1
+                else:
+                    fly_frame_index = 0
+                fly_surface = fly_frames[fly_frame_index]
+
             if event.type == pygame.KEYDOWN:
                 # When the player jumps using SPACE
                 if event.key == pygame.K_SPACE:
