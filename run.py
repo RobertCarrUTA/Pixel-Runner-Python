@@ -40,13 +40,22 @@ def obstacle_movement(enemy_list):
         # AttributeError: 'NoneType' object has no attribute 'append'
         return []
 
+def collisions(player, enemies):
+    if enemies:
+        for enemies_rect in enemies:
+            if player.colliderect(enemies_rect):
+                # When we hit an enemy, set game_active = False
+                return False
+    # When we don't hit an enemy, set game_active = True
+    return True
+
 
 # pygame.init() - starts pygame and initiates all the sub parts of pygame
 pygame.init()
-screen = pygame.display.set_mode((800, 400)) # Width of 800 pixels, height of 400 pixels
-pygame.display.set_caption("Run") # Sets the title of the window
-clock = pygame.time.Clock() # A Clock object is used to keep track of time and manage the framerate
-smooth_font = pygame.font.Font(None, 50) # Arguments: (font type, font size)
+screen = pygame.display.set_mode((800, 400))    # Width of 800 pixels, height of 400 pixels
+pygame.display.set_caption("Run")               # Sets the title of the window
+clock = pygame.time.Clock()                     # A Clock object is used to keep track of time and manage the framerate
+smooth_font = pygame.font.Font(None, 50)        # Arguments: (font type, font size)
 pixel_font = pygame.font.Font("fonts\Pixeltype.ttf", 50)
 
 # Background music
@@ -143,6 +152,7 @@ while True:
         #   and 100 pixels from the top
         screen.blit(sky_surface, (0, 0))
         screen.blit(ground_surface, (0, 300)) # 300 because that is when the sky_surface image ends
+        
         score = display_score()
 
         # Player
@@ -157,11 +167,19 @@ while True:
         # Enemy movement
         enemy_rect_list = obstacle_movement(enemy_rect_list)
 
+        # Collisions
+        game_active = collisions(player_rect, enemy_rect_list)
+
     # A menu for after the player dies
     else:
         screen.fill((94, 129, 162))
         screen.blit(player_stand, player_stand_rect)
         screen.blit(game_name, game_name_rect)
+
+        # Clear the enemy list so when the game restarts we are not colliding with an enemy
+        enemy_rect_list.clear()
+        player_rect.midbottom = (80, 300)
+        player_gravity = 0
 
         score_message = smooth_font.render(f'Your score: {score}', True, (111, 196, 169))
         score_message_rect = score_message.get_rect(center = (400, 330))
