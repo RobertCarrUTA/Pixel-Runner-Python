@@ -5,6 +5,55 @@ from sys import exit        # Secure way to end the program
 import math                 # For rounding seconds
 from random import randint  # For generating random numbers
 
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        player_walk_1 = pygame.image.load(r"graphics/player/player_walk_1.png").convert_alpha()
+        player_walk_2 = pygame.image.load(r"graphics/player/player_walk_2.png").convert_alpha()
+        self.player_walk = [player_walk_1, player_walk_2]
+        self.player_index = 0 # Used to pick the walking animation of the player
+        self.player_jump = pygame.image.load("graphics/player/jump.png").convert_alpha()
+
+        self.image = self.player_walk[self.player_index]
+
+        self.image = pygame.image.load("graphics/player/player_walk_1.png")
+        self.rect = self.image.get_rect(midbottom = (200, 300))
+        self.gravity = 0
+
+    def player_input(self):
+        # This method of getting the keys that were pressed causes a minor delay
+        keys = pygame.key.get_pressed()
+        # When the player jumps using SPACE
+        # Only allow the player to jump if they are touching the ground
+        if keys[pygame.K_SPACE] and self.rect.bottom >= 300:
+            self.gravity = -20
+
+    def apply_gravity(self):
+        self.gravity += 1
+        self.rect.y += self.gravity
+        
+        # Block the player from going underneath the ground
+        if self.rect.bottom >= 300:
+            self.rect.bottom = 300
+    
+    def animation_state(self):
+        # Display the jumping animation when the player is not on the floor
+        if self.rect.bottom < 300:
+            self.image = self.player_jump
+        # Play walking animation if the player is on the floor
+        else:
+            self.player_index += 0.1 # This allows us to slowly move to the next animation (relative to instant moving back and forth between frames)
+            if self.player_index >= len(self.player_walk):
+                self.player_index = 0
+            self.image = self.player_walk[int(self.player_index)]
+
+    def update(self):
+        self.player_input()
+        self.apply_gravity()
+        self.animation_state()
+
+
+
 def display_score():
     # pygame.time.get_ticks() will give us a time in milliseconds since we called pygame.init
     # We need to subtract the time since we last restarted to reset the timer to 0 every restart
@@ -69,6 +118,11 @@ pygame.display.set_caption("Run")               # Sets the title of the window
 clock = pygame.time.Clock()                     # A Clock object is used to keep track of time and manage the framerate
 smooth_font = pygame.font.Font(None, 50)        # Arguments: (font type, font size)
 pixel_font = pygame.font.Font(r"fonts/Pixeltype.ttf", 50)
+
+# We want to put our player into GroupSingle() because we only want a single sprite in the group
+# Group() is for a group with multiple sprites. This will be good for our enemies
+player = pygame.sprite.GroupSingle()
+player.add(Player())
 
 # Background music
 background_music = pygame.mixer.Sound(r"audio/music.wav")
@@ -215,6 +269,12 @@ while True:
             player_rect.bottom = 300
         player_animation()
         screen.blit(player_surface, player_rect)
+        
+        player.draw(screen)
+        # player.update() is better than doing something like player.jump()
+        # Groups have two main functions in pygame, one is to draw them on the screen (.draw()) and
+        # the other is to update all of the sprites (.update())
+        player.update() # calls update(self) in Player class
 
         # Enemy movement
         enemy_rect_list = obstacle_movement(enemy_rect_list)
