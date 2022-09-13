@@ -1,13 +1,13 @@
 *README still under construction*
-# Pixel Runner in Python
+# Pixel Runner
 
 ## Table of Contents
-- Pixel Runner in Python
+- Pixel Runner
   * [Game Demonstration](#pixel-runner-in-python-with-incremental-difficulty)
   * [Compile Instructions](#compile-instructions)
   * [Known Issues](#known-issues)
 
-## Pixel Runner in Python with Incremental Difficulty
+## Pixel Runner with Incremental Difficulty
 * The first GIF shows earlier parts of the game, the second GIF shows the later part of the game.
 
 
