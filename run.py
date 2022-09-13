@@ -1,13 +1,16 @@
 # This code could be heavily commented because it is for me to learn, so I will take notes
 
 import pygame
-from sys import exit        # Secure way to end the program
-import math                 # For rounding seconds
-from random import randint  # For generating random numbers
+from sys import exit                # Secure way to end the program
+import math                         # For rounding seconds
+from random import randint, choice  # For generating random numbers
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
+        # Use r"Path" to avoid errors caused by \ in the string
+        # Possibly use / instead of \, see here: https://stackoverflow.com/questions/2953834/windows-path-in-python
+        # Also consider using os.path
         player_walk_1 = pygame.image.load(r"graphics/player/player_walk_1.png").convert_alpha()
         player_walk_2 = pygame.image.load(r"graphics/player/player_walk_2.png").convert_alpha()
         self.player_walk = [player_walk_1, player_walk_2]
@@ -52,7 +55,39 @@ class Player(pygame.sprite.Sprite):
         self.apply_gravity()
         self.animation_state()
 
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, type):
+        super().__init__()
 
+        if type == "fly":
+            fly_frame_1 = pygame.image.load(r"graphics/bug/bug1.png").convert_alpha()
+            fly_frame_2 = pygame.image.load(r"graphics/bug/bug2.png").convert_alpha()
+            self.frames = [fly_frame_1, fly_frame_2]
+            y_position = 210
+        else:
+            snail_frame_1 = pygame.image.load(r"graphics/snail/snail1.png").convert_alpha()
+            snail_frame_2 = pygame.image.load(r"graphics/snail/snail2.png").convert_alpha()
+            self.frames = [snail_frame_1, snail_frame_2]
+            y_position = 300
+
+        self.animation_index = 0
+        self.image = self.frames[self.animation_index]
+        self.rect = self.image.get_rect(midbottom = (randint(900, 1100), y_position))
+
+    def animation_state(self):
+        self.animation_index += 0.1
+        if self.animation_index >= len(self.frames):
+            self.animation_index = 0
+        self.image = self.frames[int(self.animation_index)]
+
+    def destroy(self):
+        if self.rect.x <= -100:
+            self.kill()
+
+    def update(self):
+        self.animation_state()
+        self.rect.x -= 6
+        self.destroy
 
 def display_score():
     # pygame.time.get_ticks() will give us a time in milliseconds since we called pygame.init
@@ -121,8 +156,12 @@ pixel_font = pygame.font.Font(r"fonts/Pixeltype.ttf", 50)
 
 # We want to put our player into GroupSingle() because we only want a single sprite in the group
 # Group() is for a group with multiple sprites. This will be good for our enemies
+# Player Group
 player = pygame.sprite.GroupSingle()
 player.add(Player())
+
+# Enemy Group
+enemy_group = pygame.sprite.Group()
 
 # Background music
 background_music = pygame.mixer.Sound(r"audio/music.wav")
@@ -148,23 +187,6 @@ player_rect = player_surface.get_rect(midbottom = (80, 300))
 player_gravity = 0
 
 # Enemies
-
-# Snail
-# Use r"Path" to avoid errors caused by \ in the string
-# Possibly use / instead of \, see here: https://stackoverflow.com/questions/2953834/windows-path-in-python
-# Also consider using os.path
-snail_frame_1 = pygame.image.load(r"graphics/snail/snail1.png").convert_alpha()
-snail_frame_2 = pygame.image.load(r"graphics/snail/snail2.png").convert_alpha()
-snail_frames = [snail_frame_1, snail_frame_2]
-snail_frame_index = 0
-snail_surface = snail_frames[snail_frame_index]
-
-# Fly
-fly_frame_1 = pygame.image.load(r"graphics/bug/bug1.png").convert_alpha()
-fly_frame_2 = pygame.image.load(r"graphics/bug/bug2.png").convert_alpha()
-fly_frames = [fly_frame_1, fly_frame_2]
-fly_frame_index = 0
-fly_surface = fly_frames[fly_frame_index]
 
 # A list of all the current enemies
 enemy_rect_list = []
@@ -194,10 +216,10 @@ obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer, 1500) # (event we want to trigger, how ofter we want to trigger it in milliseconds)
 
 snail_animation_timer = pygame.USEREVENT + 2
-pygame.time.set_timer(snail_animation_timer, 500)
+pygame.time.set_timer(snail_animation_timer, randint(1800, 2300))
 
 fly_animation_timer = pygame.USEREVENT + 3
-pygame.time.set_timer(fly_animation_timer, 200)
+pygame.time.set_timer(fly_animation_timer, randint(1500, 2000))
 
 
 while True:
@@ -209,28 +231,21 @@ while True:
             exit()
 
         if game_active:
-            if event.type == obstacle_timer:
-                if randint(0, 2):
-                    enemy_rect_list.append(snail_surface.get_rect(midbottom = (randint(900, 1100), 300)))
-                else:
-                    enemy_rect_list.append(fly_surface.get_rect(midbottom = (randint(900, 1100), 210)))
 
-            # Animating the snail
+            # Just as a note:
+                # choice will pick one of the items to select what enemy spawns
+                # In this case, there is a 33% chance for a fly to spawn, 66% for a snail
+                # enemy_group.add(Enemy(choice(["fly", "snail", "snail"])))
             if event.type == snail_animation_timer:
-                if snail_frame_index == 0:
-                    snail_frame_index = 1
-                else:
-                    snail_frame_index = 0
-                snail_surface = snail_frames[snail_frame_index]
-                
-            # Animating the fly
+                enemy_group.add(Enemy("snail"))
             if event.type == fly_animation_timer:
-                if fly_frame_index == 0:
-                    fly_frame_index = 1
-                else:
-                    fly_frame_index = 0
-                fly_surface = fly_frames[fly_frame_index]
-
+                enemy_group.add(Enemy("fly"))
+               
+            #if event.type == obstacle_timer:
+                # choice will pick one of the items to select what enemy spawns
+                # In this case, there is a 33% chance for a fly to spawn, 66% for a snail
+                # enemy_group.add(Enemy(choice(["fly", "snail", "snail"])))
+                
             if event.type == pygame.KEYDOWN:
                 # When the player jumps using SPACE
                 if event.key == pygame.K_SPACE:
@@ -275,6 +290,8 @@ while True:
         # Groups have two main functions in pygame, one is to draw them on the screen (.draw()) and
         # the other is to update all of the sprites (.update())
         player.update() # calls update(self) in Player class
+        enemy_group.draw(screen)
+        enemy_group.update()
 
         # Enemy movement
         enemy_rect_list = obstacle_movement(enemy_rect_list)
