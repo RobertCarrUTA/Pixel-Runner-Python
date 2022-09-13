@@ -18,10 +18,10 @@ def display_score():
     
     return current_time
 
-def obstacle_movement(enemy_list):
+def obstacle_movement(enemy_list, movement_speed):
     if enemy_list:
         for enemy_rect in enemy_list:
-            enemy_rect.x -= 5
+            enemy_rect.x -= movement_speed
 
             # Differentiate between snail and fly rectangles
             if enemy_rect.bottom == 300:
@@ -94,6 +94,7 @@ player_rect = player_surface.get_rect(midbottom = (80, 300))
 player_gravity = 0
 
 # Enemies
+movement_speed = 5
 
 # Snail
 # Use r"Path" to avoid errors caused by \ in the string
@@ -142,7 +143,6 @@ pygame.time.set_timer(snail_animation_timer, 500)
 
 fly_animation_timer = pygame.USEREVENT + 3
 pygame.time.set_timer(fly_animation_timer, 200)
-
 
 while True:
     # We need to check for all the possible types of player input
@@ -203,6 +203,40 @@ while True:
         screen.blit(ground_surface, (0, 300)) # 300 because that is when the sky_surface image ends
         
         score = display_score()
+        
+        if score == 5:
+            movement_speed = 6
+
+        if score == 10:
+            movement_speed = 7
+
+        if score == 15:
+            movement_speed = 9
+            pygame.time.set_timer(obstacle_timer, 1100)
+        
+        if score == 20:
+            movement_speed = 11
+
+        if score == 25:
+            movement_speed = 13
+            pygame.time.set_timer(obstacle_timer, 800)
+
+        if score == 30:
+            movement_speed = 14
+
+        if score == 35:
+            movement_speed = 16
+            pygame.time.set_timer(obstacle_timer, 725)
+
+        if score == 40:
+            movement_speed = 16
+
+        if score == 45:
+            movement_speed = 17
+            pygame.time.set_timer(obstacle_timer, 660)
+
+        if score == 50:
+            movement_speed = 18
 
         # Player
         # I would like to note that you can print the value of a rectangle. Example:
@@ -215,7 +249,7 @@ while True:
         screen.blit(player_surface, player_rect)
 
         # Enemy movement
-        enemy_rect_list = obstacle_movement(enemy_rect_list)
+        enemy_rect_list = obstacle_movement(enemy_rect_list, movement_speed)
 
         # Collisions
         game_active = collisions(player_rect, enemy_rect_list)
@@ -225,11 +259,14 @@ while True:
         screen.fill((94, 129, 162))
         screen.blit(player_stand, player_stand_rect)
         screen.blit(game_name, game_name_rect)
-
+        
         # Clear the enemy list so when the game restarts we are not colliding with an enemy
         enemy_rect_list.clear()
         player_rect.midbottom = (80, 300)
         player_gravity = 0
+        movement_speed = 5
+        pygame.time.set_timer(obstacle_timer, 1500)
+
 
         score_message = smooth_font.render(f'Your score: {score}', True, (111, 196, 169))
         score_message_rect = score_message.get_rect(center = (400, 330))
