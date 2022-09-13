@@ -15,12 +15,14 @@ class Player(pygame.sprite.Sprite):
         player_walk_2 = pygame.image.load(r"graphics/player/player_walk_2.png").convert_alpha()
         self.player_walk = [player_walk_1, player_walk_2]
         self.player_index = 0 # Used to pick the walking animation of the player
-        self.player_jump = pygame.image.load("graphics/player/jump.png").convert_alpha()
+        self.player_jump = pygame.image.load(r"graphics/player/jump.png").convert_alpha()
+        self.jump_sound = pygame.mixer.Sound(r"audio/jump.mp3")
+        self.jump_sound.set_volume(0.1)
 
         self.image = self.player_walk[self.player_index]
 
         self.image = pygame.image.load("graphics/player/player_walk_1.png")
-        self.rect = self.image.get_rect(midbottom = (200, 300))
+        self.rect = self.image.get_rect(midbottom = (80, 300))
         self.gravity = 0
 
     def player_input(self):
@@ -29,6 +31,7 @@ class Player(pygame.sprite.Sprite):
         # When the player jumps using SPACE
         # Only allow the player to jump if they are touching the ground
         if keys[pygame.K_SPACE] and self.rect.bottom >= 300:
+            self.jump_sound.play()
             self.gravity = -20
 
     def apply_gravity(self):
@@ -88,6 +91,14 @@ class Enemy(pygame.sprite.Sprite):
         self.animation_state()
         self.rect.x -= 6
         self.destroy
+
+def collision_sprite():
+    # If the player hits an enemy
+    if pygame.sprite.spritecollide(player.sprite, enemy_group, False): # .spritecollide(sprite, group, bool)
+        enemy_group.empty()
+        return False
+    else:
+        return True
 
 def display_score():
     # pygame.time.get_ticks() will give us a time in milliseconds since we called pygame.init
@@ -174,18 +185,6 @@ background_music.play(loops = -1) # loops = -1 means play loop it forever
 sky_surface = pygame.image.load(r"graphics/sky.png").convert()
 ground_surface = pygame.image.load(r"graphics/ground.png").convert()
 
-# Player
-# Creating a player rectangle to gain more control over positioning as opposed to a surface
-# .get_rect() gets the surface and draws a rectangle around it
-player_walk_1 = pygame.image.load(r"graphics/player/player_walk_1.png").convert_alpha()
-player_walk_2 = pygame.image.load(r"graphics/player/player_walk_2.png").convert_alpha()
-player_walk = [player_walk_1, player_walk_2]
-player_index = 0 # Used to pick the walking animation of the player
-player_jump = pygame.image.load("graphics/player/jump.png").convert_alpha()
-player_surface = player_walk[player_index]
-player_rect = player_surface.get_rect(midbottom = (80, 300))
-player_gravity = 0
-
 # Enemies
 
 # A list of all the current enemies
@@ -207,19 +206,16 @@ game_active = False
 start_time = 0 # Keep track of our time
 score = 0
 
-jump_sound = pygame.mixer.Sound(r"audio/jump.mp3")
-jump_sound.set_volume(0.1)
-
 # Enemy timers
 # Create a custom user event: We need to + 1 to avoid any conflicts with other events
 obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer, 1500) # (event we want to trigger, how ofter we want to trigger it in milliseconds)
 
 snail_animation_timer = pygame.USEREVENT + 2
-pygame.time.set_timer(snail_animation_timer, randint(1800, 2300))
+pygame.time.set_timer(snail_animation_timer, 500)
 
 fly_animation_timer = pygame.USEREVENT + 3
-pygame.time.set_timer(fly_animation_timer, randint(1500, 2000))
+pygame.time.set_timer(fly_animation_timer, 200)
 
 
 while True:
@@ -231,28 +227,11 @@ while True:
             exit()
 
         if game_active:
-
-            # Just as a note:
+            if event.type == obstacle_timer:
                 # choice will pick one of the items to select what enemy spawns
-                # In this case, there is a 33% chance for a fly to spawn, 66% for a snail
-                # enemy_group.add(Enemy(choice(["fly", "snail", "snail"])))
-            if event.type == snail_animation_timer:
-                enemy_group.add(Enemy("snail"))
-            if event.type == fly_animation_timer:
-                enemy_group.add(Enemy("fly"))
-               
-            #if event.type == obstacle_timer:
-                # choice will pick one of the items to select what enemy spawns
-                # In this case, there is a 33% chance for a fly to spawn, 66% for a snail
-                # enemy_group.add(Enemy(choice(["fly", "snail", "snail"])))
+                # In this case, there is a 25% chance for a fly to spawn, 75% for a snail
+                enemy_group.add(Enemy(choice(["fly", "fly", "snail", "snail", "snail1"])))
                 
-            if event.type == pygame.KEYDOWN:
-                # When the player jumps using SPACE
-                if event.key == pygame.K_SPACE:
-                    # Only allow the player to jump if they are touching the ground
-                    if player_rect.bottom == 300:
-                        jump_sound.play()
-                        player_gravity = -20
         else:
             # Reset the game if the player presses space again
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -275,16 +254,7 @@ while True:
         
         score = display_score()
 
-        # Player
-        # I would like to note that you can print the value of a rectangle. Example:
-        # print(player_rect.left)
-        player_gravity += 1
-        player_rect.y += player_gravity
-        if player_rect.bottom >= 300:
-            player_rect.bottom = 300
-        player_animation()
-        screen.blit(player_surface, player_rect)
-        
+        # Player        
         player.draw(screen)
         # player.update() is better than doing something like player.jump()
         # Groups have two main functions in pygame, one is to draw them on the screen (.draw()) and
@@ -293,22 +263,14 @@ while True:
         enemy_group.draw(screen)
         enemy_group.update()
 
-        # Enemy movement
-        enemy_rect_list = obstacle_movement(enemy_rect_list)
-
-        # Collisions
-        game_active = collisions(player_rect, enemy_rect_list)
+        # Collision
+        game_active = collision_sprite()
 
     # A menu for after the player dies
     else:
         screen.fill((94, 129, 162))
         screen.blit(player_stand, player_stand_rect)
         screen.blit(game_name, game_name_rect)
-
-        # Clear the enemy list so when the game restarts we are not colliding with an enemy
-        enemy_rect_list.clear()
-        player_rect.midbottom = (80, 300)
-        player_gravity = 0
 
         score_message = smooth_font.render(f'Your score: {score}', True, (111, 196, 169))
         score_message_rect = score_message.get_rect(center = (400, 330))
