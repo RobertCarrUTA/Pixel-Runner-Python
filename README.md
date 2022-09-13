@@ -3,7 +3,7 @@
 
 ## Table of Contents
 - Pixel Runner
-  * [Game Demonstration](#pixel-runner-in-python-with-incremental-difficulty)
+  * [Game Demonstration](#pixel-runner-with-incremental-difficulty)
   * [Compile Instructions](#compile-instructions)
   * [Known Issues](#known-issues)
 
@@ -15,12 +15,13 @@
 
 
 ## Compile Instructions
+*As of right now, Windows 11 and Linux do not seem to be working because of path strings*
 You will need to have Python installed on your machine. After this you will need to make sure you have Pygame installed. One Windows you can enter the following command into the terminal:
 * pip install pygame
 
-On Windows, open the folder in VSCode and run the program in the terminal by entering:
+On Windows 10, open the folder in and run the program in the terminal by entering:
 * python run.py
 
 
 ## Known Issues
-The path strings will become messed up on some systems. I believe I have fixed this issue but if you run into it, please let me know.
+The path strings will become messed up on some systems. On my Windows 10 desktop it is fine. On my Windows 11 laptop it will not work, and on Linux it will not work.
