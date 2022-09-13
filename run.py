@@ -68,27 +68,27 @@ screen = pygame.display.set_mode((800, 400))    # Width of 800 pixels, height of
 pygame.display.set_caption("Run")               # Sets the title of the window
 clock = pygame.time.Clock()                     # A Clock object is used to keep track of time and manage the framerate
 smooth_font = pygame.font.Font(None, 50)        # Arguments: (font type, font size)
-pixel_font = pygame.font.Font("fonts\Pixeltype.ttf", 50)
+pixel_font = pygame.font.Font(r"fonts/Pixeltype.ttf", 50)
 
 # Background music
-background_music = pygame.mixer.Sound("audio/music.wav")
+background_music = pygame.mixer.Sound(r"audio/music.wav")
 background_music.set_volume(0.1)
 background_music.play(loops = -1) # loops = -1 means play loop it forever
 
 # Making the pygame surfaces
 # .convert() on .png images makes the image more friendly to work with for pygame
 # .convert_alpha() removes black and white background behind something like the snail
-sky_surface = pygame.image.load("graphics/sky.png").convert()
-ground_surface = pygame.image.load("graphics/ground.png").convert()
+sky_surface = pygame.image.load(r"graphics/sky.png").convert()
+ground_surface = pygame.image.load(r"graphics/ground.png").convert()
 
 # Player
 # Creating a player rectangle to gain more control over positioning as opposed to a surface
 # .get_rect() gets the surface and draws a rectangle around it
-player_walk_1 = pygame.image.load("graphics\player\player_walk_1.png").convert_alpha()
-player_walk_2 = pygame.image.load("graphics\player\player_walk_2.png").convert_alpha()
+player_walk_1 = pygame.image.load(r"graphics/player/player_walk_1.png").convert_alpha()
+player_walk_2 = pygame.image.load(r"graphics/player/player_walk_2.png").convert_alpha()
 player_walk = [player_walk_1, player_walk_2]
 player_index = 0 # Used to pick the walking animation of the player
-player_jump = pygame.image.load("graphics\player\jump.png").convert_alpha()
+player_jump = pygame.image.load("graphics/player/jump.png").convert_alpha()
 player_surface = player_walk[player_index]
 player_rect = player_surface.get_rect(midbottom = (80, 300))
 player_gravity = 0
@@ -97,15 +97,17 @@ player_gravity = 0
 
 # Snail
 # Use r"Path" to avoid errors caused by \ in the string
-snail_frame_1 = pygame.image.load(r"graphics\snail\snail1.png").convert_alpha()
-snail_frame_2 = pygame.image.load(r"graphics\snail\snail2.png").convert_alpha()
+# Possibly use / instead of \, see here: https://stackoverflow.com/questions/2953834/windows-path-in-python
+# Also consider using os.path
+snail_frame_1 = pygame.image.load(r"graphics/snail/snail1.png").convert_alpha()
+snail_frame_2 = pygame.image.load(r"graphics/snail/snail2.png").convert_alpha()
 snail_frames = [snail_frame_1, snail_frame_2]
 snail_frame_index = 0
 snail_surface = snail_frames[snail_frame_index]
 
 # Fly
-fly_frame_1 = pygame.image.load(r"graphics\bug\bug1.png").convert_alpha()
-fly_frame_2 = pygame.image.load(r"graphics\bug\bug2.png").convert_alpha()
+fly_frame_1 = pygame.image.load(r"graphics/bug/bug1.png").convert_alpha()
+fly_frame_2 = pygame.image.load(r"graphics/bug/bug2.png").convert_alpha()
 fly_frames = [fly_frame_1, fly_frame_2]
 fly_frame_index = 0
 fly_surface = fly_frames[fly_frame_index]
@@ -114,7 +116,7 @@ fly_surface = fly_frames[fly_frame_index]
 enemy_rect_list = []
 
 # Intro/Restart Screen
-player_stand = pygame.image.load("graphics\player\player_stand.png").convert_alpha()
+player_stand = pygame.image.load(r"graphics/player/player_stand.png").convert_alpha()
 player_stand = pygame.transform.rotozoom(player_stand, 0, 2) # (surface, angel, scale)
 player_stand_rect = player_stand.get_rect(center = (400, 200))
 
@@ -129,7 +131,7 @@ game_active = False
 start_time = 0 # Keep track of our time
 score = 0
 
-jump_sound = pygame.mixer.Sound("audio\jump.mp3")
+jump_sound = pygame.mixer.Sound(r"audio/jump.mp3")
 jump_sound.set_volume(0.1)
 
 # Enemy timers
