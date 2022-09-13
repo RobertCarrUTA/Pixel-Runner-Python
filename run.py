@@ -16,7 +16,7 @@ def display_score():
     current_time                = math.floor(current_time_milliseconds/1000)
     
     # f'{}' might be more secure and faster than str()?
-    score_surface   = smooth_font.render(f'Score: {current_time}', True, "Black") # Arguments: (text, AA, color) - AA - anti-alias option
+    score_surface   = smooth_font.render(f'Score: {current_time}', True, (0, 0, 0)) # Arguments: (text, AA, color) - AA - anti-alias option
     score_rect      = score_surface.get_rect(center = (400, 50))
     screen.blit(score_surface, score_rect)
     
@@ -75,7 +75,7 @@ def player_animation():
 cwd = os.getcwd()
 pixel_font_path         = os.path.join(cwd, "fonts/Pixeltype.ttf")
 background_music_path   = os.path.join(cwd, "audio/music.wav")
-jump_sound_path         = os.path.join(cwd, "audio/jump.mp3")
+jump_sound_path         = os.path.join(cwd, "audio/jump.wav")
 sky_surface_path        = os.path.join(cwd, "graphics/sky.png")
 ground_surface_path     = os.path.join(cwd, "graphics/ground.png")
 player_walk_1_path      = os.path.join(cwd, "graphics/player/player_walk_1.png")
