@@ -1,5 +1,6 @@
 *README still under construction*
 # Running Game in Python
+![Alt Text](https://github.com/RobertCarrUTA/Running-Game-Python/blob/Adding-The-Sprite-Class-(OOP-in-Pygame)/gifs/run.gif)
 
 ## Compile Instructions
 You will need to have Python installed on your machine. After this you will need to make sure you have Pygame installed. One Windows you can enter the following command into the terminal:
