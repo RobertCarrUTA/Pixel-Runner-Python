@@ -18,6 +18,11 @@
 **As of right now, Windows 11 and Linux do not seem to be working because of path strings**
 
 
+### Linux
+* To install pygame: sudo apt-get install python3-pygame
+* To run: python3 run.py
+
+### Windows 10
 You will need to have Python installed on your machine. After this you will need to make sure you have Pygame installed. One Windows you can enter the following command into the terminal:
 * pip install pygame
 
