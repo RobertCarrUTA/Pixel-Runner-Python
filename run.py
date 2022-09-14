@@ -1,6 +1,8 @@
 # This code could be heavily commented because it is for me to learn, so I will take notes
 
-# To run the game, enter: Python run.py in the directory of the run.py file
+# Please refer to the README for compile instructions. Ensure you have Python and Pygame installed on your system
+#   To run on Windows: python run.py
+#   To run on Linux: python3 run.py
 
 import pygame
 import os                   # To get the current directory on varied systems
