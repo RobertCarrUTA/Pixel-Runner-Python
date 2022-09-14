@@ -1,4 +1,3 @@
-*README still under construction*
 # Pixel Runner
 
 ## Table of Contents
